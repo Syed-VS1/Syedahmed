@@ -1,0 +1,25 @@
+import json
+import re
+
+def getJSONContent(file):
+    #Reads a JSON file and returns its content as a list of dictionaries.
+    with open(file, 'r') as f:
+        return json.load(f)
+
+def validatePhoneNumber(phoneNumber):
+    # Validates a phone number.
+    if re.match(r"^\d{10}$", phoneNumber):
+        return int(phoneNumber)
+    return 1
+
+def validateZips(zipCode):
+    # Validates a zip code.
+    if re.match(r"^\d{5}$", zipCode):
+        return int(zipCode)
+    return 1
+    
+    
+ 
+    
+
+
