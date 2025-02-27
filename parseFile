@@ -1,10 +1,47 @@
 import json
 import re
 
+import os
+
+
+
 def getJSONContent(file):
     #Reads a JSON file and returns its content as a list of dictionaries.
     with open(file, 'r') as f:
         return json.load(f)
+
+
+def processEachEmp(empList):
+    
+    #Processes each employee entry and formats it based on the specified criteria.
+
+    
+    formattedEmps = []
+
+    for emp in empList:
+        # Validate phone number and zip code
+        phone = validatePhoneNumber(emp.get("Phone Number", ""))
+        zipCode = validateZips(emp.get("Zip Code", ""))
+
+        # Skip the entry if phone or zip code is invalid
+        if phone == 1 or zipCode == 1:
+            continue
+
+        # Create a formatted employee dictionary
+        formattedEmp = {
+            "First Name": emp.get("First Name", ""),
+            "Last Name": emp.get("Last Name", ""),
+            "Phone Number": phone,
+            "Zip Code": zipCode,
+            "Email": generateEmail(emp.get("First Name", ""), emp.get("Last Name", "")),
+            "Salary": generateSalary(emp.get("Job ID", ""), emp.get("State", ""))
+        }
+
+        # Add the formatted employee to the list
+        formattedEmps.append(formattedEmp)
+
+    return formattedEmps
+
 
 def validatePhoneNumber(phoneNumber):
     # Validates a phone number.
@@ -18,8 +55,61 @@ def validateZips(zipCode):
         return int(zipCode)
     return 1
     
+
+def generateEmail(firstname, lastname):
     
+    # Generates the email address for the employee in the format first letter of the first name full last name@comp.com.
+
+    
+    return f"{firstname[0].lower()}{lastname.lower()}@comp.com"
+
+
+def generateSalary(jobId, state):
+    
+    #Calculates the salary of the employee based on their job ID and state.
+    
+    # Base salaries for each department
+    base_salaries = {
+        "SA": 60000,  # Sales
+        "IT": 80000,  # IT
+        "HR": 70000   # HR
+    }
+
+    # States with a high cost of living
+    high_cost_states = ["New York", "California", "Oregon", "Washington", "Vermont"]
+
+    # Extract the department from the job ID
+    department = jobId.split('_')[0]
+    base_salary = base_salaries.get(department, 0)
+
+    # Add 5% for managers
+    if "_MNG" in jobId:
+        base_salary *= 1.05
+
+    # Add 1.5% for high-cost states
+    if state in high_cost_states:
+        base_salary *= 1.015
+
+    # Round the salary to 2 decimal places
+    return round(base_salary, 2)
  
+
+def generateFormattedFile(empList, ogPath):
+    
+    # Saves the formatted employee list to a new JSON file in the same directory as the original file.
+
+    
+    # Get the directory path and original file name
+    dir_path = os.path.dirname(ogPath)
+    file_name = os.path.basename(ogPath).replace(".json", "_formatted.json")
+
+    # Create the new file path
+    new_path = os.path.join(dir_path, file_name)
+
+    # Save the formatted employee list to the new JSON file
+    with open(new_path, 'w') as f:
+        json.dump(empList, f, indent=4)
+
     
 
 
